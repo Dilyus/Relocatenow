@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация | Умный помощник{% endblock %}
+
+{% block content %}
+<section class="form-card">
+    <h1>Регистрация</h1>
+    <form method="post" class="form">
+        <label>
+            Имя пользователя
+            <input type="text" name="username" required minlength="3">
+        </label>
+        <label>
+            Пароль
+            <input type="password" name="password" required minlength="5">
+        </label>
+        <label>
+            Повторите пароль
+            <input type="password" name="password_repeat" required minlength="5">
+        </label>
+        <button class="button primary" type="submit">Зарегистрироваться</button>
+    </form>
+    <p class="muted">Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a></p>
+</section>
+{% endblock %}
