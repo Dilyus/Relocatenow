@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Результаты подбора | Умный помощник{% endblock %}
+
+{% block content %}
+<section class="section-heading">
+    <h1>Результаты подбора</h1>
+    <p>
+        Бюджет: {{ criteria.max_rent_usd|rub }},
+        климат: {{ climate_label(criteria.climate_preference) }},
+        море: {{ sea_label(criteria.sea_preference) }}.
+    </p>
+</section>
+
+{% if cities %}
+<section class="top-cities">
+    {% for city in cities[:3] %}
+        <article class="city-card">
+            <div class="score-badge {{ city.score_class }}">{{ city.score }}%</div>
+            <h2>{{ loop.index }}. {{ city.name }}</h2>
+            <p class="muted">{{ city.region }}</p>
+            <p>{{ city.description }}</p>
+            <div class="city-card-meta">
+                <span>Аренда: {{ city.avg_rent_usd|rub }}</span>
+                <span>Интернет: {{ city.internet_score }}/10</span>
+                <span>Безопасность: {{ city.safety_score }}/10</span>
+            </div>
+            <div class="card-actions">
+                <a class="button small-button" href="{{ url_for('city_detail', city_id=city.id) }}">Подробнее</a>
+                {% if city.id in favorite_city_ids %}
+                    <form method="post" action="{{ url_for('remove_favorite', city_id=city.id) }}">
+                        <button class="button small-button ghost" type="submit">Удалить из избранного</button>
+                    </form>
+                {% else %}
+                    <form method="post" action="{{ url_for('add_favorite', city_id=city.id) }}">
+                        <button class="button small-button secondary" type="submit">Добавить в избранное</button>
+                    </form>
+                {% endif %}
+            </div>
+        </article>
+    {% endfor %}
+</section>
+{% endif %}
+
+<section class="map-section">
+    <h2>Города на карте</h2>
+    <div id="map-message" class="map-message">
+        Карта загрузится после добавления ключа Яндекс.Карт. Пока показана таблица результатов.
+    </div>
+    <div id="map" class="map"></div>
+</section>
+
+<section class="table-section">
+    <h2>Таблица результатов</h2>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Место</th>
+                    <th>Город</th>
+                    <th>Регион</th>
+                    <th>Аренда</th>
+                    <th>Климат</th>
+                    <th>Безопасность</th>
+                    <th>Интернет</th>
+                    <th>Экология</th>
+                    <th>Инфраструктура</th>
+                    <th>Итог</th>
+                    <th>Описание</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for city in cities %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ city.name }}</td>
+                        <td>{{ city.region }}</td>
+                        <td>{{ city.avg_rent_usd|rub }}</td>
+                        <td>{{ city.climate_score }}/10</td>
+                        <td>{{ city.safety_score }}/10</td>
+                        <td>{{ city.internet_score }}/10</td>
+                        <td>{{ city.ecology_score }}/10</td>
+                        <td>{{ city.infrastructure_score }}/10</td>
+                        <td>
+                            <span class="score-pill {{ city.score_class }}">{{ city.score }}%</span>
+                            <span class="small block">{{ city.score_label }}</span>
+                        </td>
+                        <td>{{ city.description }}</td>
+                        <td>
+                            <div class="table-actions">
+                                <a class="button small-button" href="{{ url_for('city_detail', city_id=city.id) }}">Подробнее</a>
+                                {% if city.id in favorite_city_ids %}
+                                    <form method="post" action="{{ url_for('remove_favorite', city_id=city.id) }}">
+                                        <button class="button small-button ghost" type="submit">Удалить</button>
+                                    </form>
+                                {% else %}
+                                    <form method="post" action="{{ url_for('add_favorite', city_id=city.id) }}">
+                                        <button class="button small-button secondary" type="submit">В избранное</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% set yandex_key = config.get("YANDEX_MAPS_API_KEY", "YOUR_YANDEX_MAPS_API_KEY") %}
+{% if yandex_key and yandex_key != "YOUR_YANDEX_MAPS_API_KEY" %}
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{ yandex_key }}&lang=ru_RU"></script>
+{% endif %}
+<script>
+    window.CITY_RESULTS = {{ map_cities|tojson }};
+    window.YANDEX_MAPS_API_KEY = {{ yandex_key|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}

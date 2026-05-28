@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}{{ city.name }} | Умный помощник{% endblock %}
+
+{% block content %}
+<section class="city-hero">
+    <div>
+        <span class="eyebrow">Карточка города</span>
+        <h1>{{ city.name }}</h1>
+        <p>{{ city.region }}</p>
+    </div>
+    <div class="city-hero-actions">
+        {% if current_user %}
+            {% if is_favorite %}
+                <form method="post" action="{{ url_for('remove_favorite', city_id=city.id) }}">
+                    <button class="button ghost" type="submit">Удалить из избранного</button>
+                </form>
+            {% else %}
+                <form method="post" action="{{ url_for('add_favorite', city_id=city.id) }}">
+                    <button class="button primary" type="submit">Добавить в избранное</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <a class="button primary" href="{{ url_for('login') }}">Войти, чтобы добавить в избранное</a>
+        {% endif %}
+    </div>
+</section>
+
+<section class="detail-grid">
+    <article class="detail-card weather-card">
+        <h2>Погода в городе</h2>
+        {% if weather %}
+            <div class="weather-main">{{ weather.temperature }} °C</div>
+            <dl class="stats-list">
+                <div><dt>Ощущается как</dt><dd>{{ weather.feels_like }} °C</dd></div>
+                <div><dt>Описание</dt><dd>{{ weather.description }}</dd></div>
+                <div><dt>Влажность</dt><dd>{{ weather.humidity }}%</dd></div>
+                <div><dt>Скорость ветра</dt><dd>{{ weather.wind_speed }} м/с</dd></div>
+            </dl>
+        {% else %}
+            <p class="muted">Данные о погоде временно недоступны</p>
+        {% endif %}
+    </article>
+
+    <article class="detail-card">
+        <h2>Показатели для переезда</h2>
+        {% if city_stats %}
+            <dl class="stats-list">
+                <div><dt>Средняя аренда</dt><dd>{{ city_stats.avg_rent_price|rub }}</dd></div>
+                <div><dt>Средняя цена покупки квартиры</dt><dd>{{ city_stats.avg_buy_price_m2|rub }}</dd></div>
+                <div><dt>Уровень преступности</dt><dd>{{ city_stats.crime_level }}</dd></div>
+                <div><dt>Уровень безопасности</dt><dd>{{ city_stats.safety_level }}</dd></div>
+                <div><dt>Источник</dt><dd>{{ city_stats.source_name }}</dd></div>
+                <div><dt>Обновлено</dt><dd>{{ city_stats.updated_at.strftime("%Y-%m-%d") }}</dd></div>
+            </dl>
+            {% if city_stats.source_url %}
+                <p><a href="{{ city_stats.source_url }}" target="_blank" rel="noopener">Открыть источник</a></p>
+            {% endif %}
+        {% else %}
+            <p class="muted">Показатели временно недоступны.</p>
+        {% endif %}
+    </article>
+</section>
+
+<section class="detail-grid">
+    <article class="detail-card">
+        <h2>Основные данные</h2>
+        <dl class="stats-list">
+            <div><dt>Население</dt><dd>{{ "{:,}".format(city.population).replace(",", " ") }}</dd></div>
+            <div><dt>Координаты</dt><dd>{{ city.latitude }}, {{ city.longitude }}</dd></div>
+            <div><dt>Средняя аренда</dt><dd>{{ city.avg_rent_usd|rub }}</dd></div>
+            <div><dt>Бюджет на месяц</dt><dd>{{ city.monthly_budget_usd|rub }}</dd></div>
+        </dl>
+    </article>
+
+    <article class="detail-card">
+        <h2>Оценки города</h2>
+        <div class="metric-grid">
+            <span>Климат <strong>{{ city.climate_score }}/10</strong></span>
+            <span>Безопасность <strong>{{ city.safety_score }}/10</strong></span>
+            <span>Интернет <strong>{{ city.internet_score }}/10</strong></span>
+            <span>Экология <strong>{{ city.ecology_score }}/10</strong></span>
+            <span>Инфраструктура <strong>{{ city.infrastructure_score }}/10</strong></span>
+            <span>Море/вода <strong>{{ city.sea_score }}/10</strong></span>
+        </div>
+    </article>
+</section>
+
+<section class="detail-card city-description">
+    <h2>Описание</h2>
+    <p>{{ city.description }}</p>
+    <p><strong>Кому подойдет:</strong> {{ city.suitable_for }}.</p>
+    <p><strong>Вывод:</strong> {{ city.relocation_summary }}</p>
+</section>
+
+<section class="city-info-grid">
+    <article class="detail-card">
+        <h2>Плюсы</h2>
+        <ul class="clean-list">
+            {% for item in pros %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </article>
+    <article class="detail-card">
+        <h2>Минусы</h2>
+        <ul class="clean-list">
+            {% for item in cons %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </article>
+    <article class="detail-card">
+        <h2>Достопримечательности</h2>
+        <ul class="clean-list">
+            {% for item in attractions %}
+                <li>{{ item.name }}</li>
+            {% endfor %}
+        </ul>
+    </article>
+    <article class="detail-card">
+        <h2>Транспорт</h2>
+        <p>{{ city.transport_info }}</p>
+    </article>
+    <article class="detail-card">
+        <h2>Образование</h2>
+        <p>{{ city.education_info }}</p>
+    </article>
+    <article class="detail-card">
+        <h2>Медицина</h2>
+        <p>{{ city.healthcare_info }}</p>
+    </article>
+    <article class="detail-card wide-card">
+        <h2>Работа и возможности</h2>
+        <p>{{ city.job_info }}</p>
+    </article>
+</section>
+
+<section class="map-section">
+    <h2>{{ city.name }} на карте</h2>
+    <div id="map-message" class="map-message">
+        Карта загрузится после добавления ключа Яндекс.Карт.
+    </div>
+    <div id="map" class="map"></div>
+</section>
+
+{% set yandex_key = config.get("YANDEX_MAPS_API_KEY", "YOUR_YANDEX_MAPS_API_KEY") %}
+{% if yandex_key and yandex_key != "YOUR_YANDEX_MAPS_API_KEY" %}
+    <script src="https://api-maps.yandex.ru/2.1/?apikey={{ yandex_key }}&lang=ru_RU"></script>
+{% endif %}
+<script>
+    window.CITY_RESULTS = {{ map_cities|tojson }};
+    window.YANDEX_MAPS_API_KEY = {{ yandex_key|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Подбор города | Умный помощник{% endblock %}
+
+{% block content %}
+<section class="section-heading">
+    <h1>Подбор города</h1>
+    <p>Заполните критерии, и приложение рассчитает рейтинг городов для переезда.</p>
+</section>
+
+<section class="form-card wide">
+    <div class="form-intro">
+        <h2>Критерии переезда</h2>
+        <p>Вес критериев фиксированный: аренда, климат, безопасность, интернет, экология и инфраструктура.</p>
+    </div>
+    <form method="post" action="{{ url_for('results') }}" class="form grid-form">
+        <label>
+            Максимальный бюджет аренды в рублях
+            <input type="number" name="max_rent_usd" min="1" step="1" placeholder="Например 40000" required>
+        </label>
+
+        <label>
+            Желаемый климат
+            <select name="climate_preference" required>
+                <option value="">Выберите</option>
+                <option value="cold">Холодный</option>
+                <option value="moderate">Умеренный</option>
+                <option value="warm">Теплый</option>
+            </select>
+        </label>
+
+        <label>
+            Нужна ли близость к морю
+            <select name="sea_preference" required>
+                <option value="any">Неважно</option>
+                <option value="yes">Да</option>
+                <option value="no">Нет</option>
+            </select>
+        </label>
+
+        <label>
+            Важна ли безопасность
+            <select name="safety_important">
+                <option value="yes">Да</option>
+                <option value="no">Нет</option>
+            </select>
+        </label>
+
+        <label>
+            Важен ли быстрый интернет
+            <select name="internet_important">
+                <option value="yes">Да</option>
+                <option value="no">Нет</option>
+            </select>
+        </label>
+
+        <label>
+            Важна ли экология
+            <select name="ecology_important">
+                <option value="yes">Да</option>
+                <option value="no">Нет</option>
+            </select>
+        </label>
+
+        <label>
+            Важна ли развитая инфраструктура
+            <select name="infrastructure_important">
+                <option value="yes">Да</option>
+                <option value="no">Нет</option>
+            </select>
+        </label>
+
+        <div class="form-actions">
+            <button class="button primary" type="submit">Подобрать город</button>
+        </div>
+    </form>
+</section>
+{% endblock %}
