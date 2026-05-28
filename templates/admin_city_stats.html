@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Справочник показателей | Умный помощник{% endblock %}
+
+{% block content %}
+<section class="section-heading">
+    <h1>Справочник показателей переезда</h1>
+    <p>Данные сохраняются в SQLite-таблице CityStats и используются на карточке города.</p>
+</section>
+
+<section class="form-card wide">
+    <div class="form-intro">
+        <h2>{% if edit_stat %}Редактирование записи{% else %}Новая запись{% endif %}</h2>
+        <p>Можно указать учебный источник, дату обновления и показатели жилья/безопасности.</p>
+    </div>
+    <form method="post" class="form grid-form">
+        {% if edit_stat %}
+            <input type="hidden" name="stat_id" value="{{ edit_stat.id }}">
+        {% endif %}
+
+        <label>
+            Город
+            <select name="city_id" required>
+                <option value="">Выберите город</option>
+                {% for city in cities %}
+                    <option value="{{ city.id }}" {% if edit_stat and edit_stat.city_id == city.id %}selected{% endif %}>
+                        {{ city.name }} — {{ city.region }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>
+            Средняя цена аренды в рублях
+            <input type="number" name="avg_rent_price" min="0" step="1" value="{{ edit_stat.avg_rent_price|rub_number if edit_stat else '' }}" required>
+        </label>
+
+        <label>
+            Средняя цена покупки квартиры в рублях
+            <input type="number" name="avg_buy_price_m2" min="0" step="1" value="{{ edit_stat.avg_buy_price_m2|rub_number if edit_stat else '' }}" required>
+        </label>
+
+        <label>
+            Уровень преступности
+            <input type="text" name="crime_level" placeholder="низкий / средний / повышенный" value="{{ edit_stat.crime_level if edit_stat else '' }}" required>
+        </label>
+
+        <label>
+            Уровень безопасности
+            <input type="text" name="safety_level" placeholder="высокий / средний / требует внимания" value="{{ edit_stat.safety_level if edit_stat else '' }}" required>
+        </label>
+
+        <label>
+            Источник данных
+            <input type="text" name="source_name" value="{{ edit_stat.source_name if edit_stat else 'Учебные данные' }}">
+        </label>
+
+        <label>
+            Ссылка на источник
+            <input type="url" name="source_url" value="{{ edit_stat.source_url if edit_stat else '' }}">
+        </label>
+
+        <label>
+            Дата обновления
+            <input type="date" name="updated_at" value="{{ edit_stat.updated_at.strftime('%Y-%m-%d') if edit_stat else '' }}">
+        </label>
+
+        <div class="form-actions">
+            <button class="button primary" type="submit">Сохранить</button>
+            {% if edit_stat %}
+                <a class="button ghost" href="{{ url_for('admin_city_stats') }}">Отмена</a>
+            {% endif %}
+        </div>
+    </form>
+</section>
+
+<section class="table-section">
+    <h2>Записи CityStats</h2>
+    {% if stats %}
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Город</th>
+                        <th>Аренда</th>
+                        <th>Покупка квартиры</th>
+                        <th>Преступность</th>
+                        <th>Безопасность</th>
+                        <th>Источник</th>
+                        <th>Обновлено</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in stats %}
+                        <tr>
+                            <td>{{ stat.city.name }}</td>
+                            <td>{{ stat.avg_rent_price|rub }}</td>
+                            <td>{{ stat.avg_buy_price_m2|rub }}</td>
+                            <td>{{ stat.crime_level }}</td>
+                            <td>{{ stat.safety_level }}</td>
+                            <td>{{ stat.source_name }}</td>
+                            <td>{{ stat.updated_at.strftime("%Y-%m-%d") }}</td>
+                            <td>
+                                <div class="table-actions">
+                                    <a class="button small-button" href="{{ url_for('admin_city_stats', edit=stat.id) }}">Изменить</a>
+                                    <form method="post" action="{{ url_for('delete_city_stats', stat_id=stat.id) }}">
+                                        <button class="button small-button ghost" type="submit">Удалить</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">Пока нет записей.</div>
+    {% endif %}
+</section>
+{% endblock %}

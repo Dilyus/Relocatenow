@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}История запросов | Умный помощник{% endblock %}
+
+{% block content %}
+<section class="section-heading">
+    <h1>История запросов</h1>
+    <p>Здесь показаны только ваши подборы городов.</p>
+</section>
+
+{% if history_rows %}
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Бюджет</th>
+                    <th>Климат</th>
+                    <th>Близость к морю</th>
+                    <th>Лучший город</th>
+                    <th>Рейтинг</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in history_rows %}
+                    <tr>
+                        <td>{{ row.created_at }}</td>
+                        <td>{{ row.max_rent_usd|rub }}</td>
+                        <td>{{ row.climate_preference }}</td>
+                        <td>{{ row.sea_preference }}</td>
+                        <td>{{ row.best_city }}</td>
+                        <td>{{ row.best_score }}%</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        История пока пустая. После первого подбора здесь появится запись.
+    </div>
+{% endif %}
+{% endblock %}

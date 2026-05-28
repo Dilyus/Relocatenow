@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Избранное | Умный помощник{% endblock %}
+
+{% block content %}
+<section class="section-heading">
+    <h1>Избранное</h1>
+    <p>Сохраненные города, к которым можно быстро вернуться.</p>
+</section>
+
+{% if cities %}
+    <section class="favorites-grid">
+        {% for city in cities %}
+            <article class="city-card favorite-card">
+                <h2>{{ city.name }}</h2>
+                <p class="muted">{{ city.region }}</p>
+                <div class="city-card-meta">
+                    <span>Аренда: {{ city.avg_rent_usd|rub }}</span>
+                    <span>Безопасность: {{ city.safety_score }}/10</span>
+                    <span>Интернет: {{ city.internet_score }}/10</span>
+                    <span>Экология: {{ city.ecology_score }}/10</span>
+                    <span>Инфраструктура: {{ city.infrastructure_score }}/10</span>
+                </div>
+                <div class="card-actions">
+                    <a class="button small-button" href="{{ url_for('city_detail', city_id=city.id) }}">Открыть город</a>
+                    <form method="post" action="{{ url_for('remove_favorite', city_id=city.id) }}">
+                        <button class="button small-button ghost" type="submit">Удалить из избранного</button>
+                    </form>
+                </div>
+            </article>
+        {% endfor %}
+    </section>
+{% else %}
+    <div class="empty-state">
+        Избранное пока пустое. Откройте результаты подбора или карточку города и сохраните подходящий вариант.
+    </div>
+{% endif %}
+{% endblock %}
