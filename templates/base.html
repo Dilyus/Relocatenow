@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Умный помощник для выбора города{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+</head>
+<body class="light-theme">
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand-block">
+                <a class="logo" href="{{ url_for('index') }}">Relocate</a>
+            </div>
+            <div class="header-actions">
+                <nav class="nav">
+                    <a href="{{ url_for('index') }}">Главная</a>
+                    {% if current_user %}
+                        <a href="{{ url_for('dashboard') }}">Подбор города</a>
+                        <a href="{{ url_for('favorites') }}">Избранное</a>
+                        <a href="{{ url_for('history') }}">История</a>
+                        {% if current_user.username == "admin" %}
+                            <a href="{{ url_for('admin_city_stats') }}">Справочник</a>
+                        {% endif %}
+                        <a href="{{ url_for('logout') }}">Выйти</a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}">Войти</a>
+                        <a href="{{ url_for('register') }}">Регистрация</a>
+                    {% endif %}
+                </nav>
+                <label class="theme-switcher">
+                    Тема
+                    <select id="theme-select" aria-label="Выбор темы сайта">
+                        <option value="light-theme">Светлая</option>
+                        <option value="dark-theme">Тёмная</option>
+                        <option value="super-dark-theme">Супер-тёмная</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <main class="container page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-list">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+</html>
